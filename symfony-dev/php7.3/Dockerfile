@@ -14,6 +14,7 @@ RUN apt-get update -q -y \
     && docker-php-ext-enable xdebug \
     # Install/Enable common extensions
     && docker-php-ext-install -j$(nproc) bcmath \
+    && docker-php-ext-install -j$(nproc) pdo_mysql \
     # Install XDebug for code coverage
     # Clean up
     && docker-php-source delete \
