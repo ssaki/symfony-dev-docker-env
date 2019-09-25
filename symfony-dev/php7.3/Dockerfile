@@ -34,7 +34,9 @@ RUN curl -O -L -sS  https://github.com/symfony/cli/releases/download/v4.7.0/symf
     && mv symfony_linux_amd64 /usr/local/bin/symfony \
     && chmod +x /usr/local/bin/symfony
 
+ENV PROJECT_ROOT=/usr/src/symfony-app
+WORKDIR $PROJECT_ROOT
+
 EXPOSE 8000
 
-#ENTRYPOINT ['symfony']
-CMD ["symfony", "serve", "--no-tls"]
+CMD ["sh", "-c",  "symfony serve --no-tls --dir=$PROJECT_ROOT"]
