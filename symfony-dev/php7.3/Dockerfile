@@ -8,11 +8,18 @@ RUN apt-get update -q -y \
             # install inzip and git - both needed by composer
             unzip \
             git \
+            # deps of pdo_pgsql
+            libpq-dev \
+            # deps of ext-zip
+            zlib1g-dev \
+            libzip-dev \
     ### PHP
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     # Install/Enable common extensions
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql pgsql \
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql \
