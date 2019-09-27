@@ -15,6 +15,8 @@ RUN apt-get update -q -y \
     # Install/Enable common extensions
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql \
+    && docker-php-ext-install -j$(nproc) zip \
     # Install XDebug for code coverage
     # Clean up
     && docker-php-source delete \
