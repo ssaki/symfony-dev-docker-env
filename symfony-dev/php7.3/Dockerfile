@@ -13,6 +13,8 @@ RUN apt-get update -q -y \
             # deps of ext-zip
             zlib1g-dev \
             libzip-dev \
+            # recode
+            librecode-dev \
     ### PHP
     && docker-php-source extract \
     && pecl install xdebug \
@@ -23,6 +25,8 @@ RUN apt-get update -q -y \
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql \
+    && docker-php-ext-install -j$(nproc) recode \
+    && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) zip \
     # Install XDebug for code coverage
     # Clean up
