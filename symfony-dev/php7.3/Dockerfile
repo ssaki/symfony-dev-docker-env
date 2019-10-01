@@ -46,11 +46,13 @@ RUN curl -sS https://getcomposer.org/installer | php \
 RUN curl -O -L -sS  https://github.com/symfony/cli/releases/download/v4.7.0/symfony_linux_amd64.gz \
     && gzip -d symfony_linux_amd64.gz \
     && mv symfony_linux_amd64 /usr/local/bin/symfony \
-    && chmod +x /usr/local/bin/symfony
+    && chmod +x /usr/local/bin/symfony \
+    && mkdir -p /root/.symfony/autoupdate \
+    && touch /root/.symfony/autoupdate/silence
 
 ENV PROJECT_ROOT=/usr/src/symfony-app
 WORKDIR $PROJECT_ROOT
 
 EXPOSE 8000
 
-CMD ["sh", "-c",  "(tedt -d ./vendor || composer install) && symfony serve --no-tls --dir=$PROJECT_ROOT"]
+CMD ["sh", "-c",  "(test -d ./vendor || composer install) && symfony serve --no-tls --dir=$PROJECT_ROOT"]
