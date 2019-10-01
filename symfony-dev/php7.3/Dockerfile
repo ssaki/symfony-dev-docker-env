@@ -53,4 +53,4 @@ WORKDIR $PROJECT_ROOT
 
 EXPOSE 8000
 
-CMD ["sh", "-c",  "symfony serve --no-tls --dir=$PROJECT_ROOT"]
+CMD ["sh", "-c",  "(tedt -d ./vendor || composer install) && symfony serve --no-tls --dir=$PROJECT_ROOT"]
