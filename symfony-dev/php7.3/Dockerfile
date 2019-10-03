@@ -48,7 +48,23 @@ WORKDIR $PROJECT_ROOT
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN a2enmod rewrite
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN echo '\
+<VirtualHost *:80> \n\
+	#ServerName www.example.com \n\
+	ServerAdmin webmaster@localhost \n\
+	DocumentRoot ${APACHE_DOCUMENT_ROOT} \n\
+	ErrorLog ${APACHE_LOG_DIR}/error.log \n\
+	CustomLog ${APACHE_LOG_DIR}/access.log combined \n\
+    <Directory ${APACHE_DOCUMENT_ROOT}> \n\
+        AllowOverride None \n\
+        Order Allow,Deny \n\
+        Allow from All \n\
+        FallbackResource /index.php \n\
+    </Directory> \n\
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1 \n\
+</VirtualHost> \n\
+' > /etc/apache2/sites-available/000-default.conf
+
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 EXPOSE 80
