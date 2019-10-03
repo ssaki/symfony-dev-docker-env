@@ -1,4 +1,4 @@
-FROM php:7.3-cli-buster
+FROM php:7.3-apache
 
 MAINTAINER Alexander Marinov <alexander.marinov@web-lab.ltd>
 
@@ -42,17 +42,12 @@ RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer \
     && chmod +x /usr/local/bin/composer
 
-# Install the Symfony command
-RUN curl -O -L -sS  https://github.com/symfony/cli/releases/download/v4.7.0/symfony_linux_amd64.gz \
-    && gzip -d symfony_linux_amd64.gz \
-    && mv symfony_linux_amd64 /usr/local/bin/symfony \
-    && chmod +x /usr/local/bin/symfony \
-    && mkdir -p /root/.symfony/autoupdate \
-    && touch /root/.symfony/autoupdate/silence
-
-ENV PROJECT_ROOT=/usr/src/symfony-app
+ENV PROJECT_ROOT=/var/www/html/
 WORKDIR $PROJECT_ROOT
 
-EXPOSE 8000
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
-CMD ["sh", "-c",  "(test -d ./vendor || composer install) && symfony serve --no-tls --dir=$PROJECT_ROOT"]
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+EXPOSE 80
