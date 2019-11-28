@@ -1,4 +1,4 @@
-FROM php:7.4-rc-cli-buster
+FROM php:7.4-cli-buster
 
 MAINTAINER Alexander Marinov <alexander.marinov@web-lab.ltd>
 
