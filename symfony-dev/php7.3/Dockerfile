@@ -15,19 +15,23 @@ RUN apt-get update -q -y \
             libzip-dev \
             # recode
             librecode-dev \
+            # soap
+            libxml2-dev \
     ### PHP
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
+    && pecl install -o -f redis \
+    && docker-php-ext-enable redis \
     # Install/Enable common extensions
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql pgsql \
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql \
     && docker-php-ext-install -j$(nproc) recode \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) zip \
+    && docker-php-ext-install -j$(nproc) soap \
     # Install XDebug for code coverage
     # Clean up
     && docker-php-source delete \
@@ -48,23 +52,8 @@ WORKDIR $PROJECT_ROOT
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN a2enmod rewrite
 
-RUN echo '\
-<VirtualHost *:80> \n\
-	#ServerName www.example.com \n\
-	ServerAdmin webmaster@localhost \n\
-	DocumentRoot ${APACHE_DOCUMENT_ROOT} \n\
-	ErrorLog ${APACHE_LOG_DIR}/error.log \n\
-	CustomLog ${APACHE_LOG_DIR}/access.log combined \n\
-    <Directory ${APACHE_DOCUMENT_ROOT}> \n\
-        AllowOverride None \n\
-        Order Allow,Deny \n\
-        Allow from All \n\
-        FallbackResource /index.php \n\
-    </Directory> \n\
-    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1 \n\
-</VirtualHost> \n\
-' > /etc/apache2/sites-available/000-default.conf
-
+COPY apache/000-default.conf /etc/apache2/sites-available
+COPY php/90-xdebug-custom.ini /usr/local/etc/php/conf.d/
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 EXPOSE 80
