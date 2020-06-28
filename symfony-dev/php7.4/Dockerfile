@@ -11,11 +11,18 @@ RUN apt-get update -q -y \
             # deps of ext-zip
             zlib1g-dev \
             libzip-dev \
+            # deps for imagic
+            libgraphicsmagick1-dev libpng-dev libjpeg-dev \
     ### PHP
     # Install XDebug for debug && code coverage
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
+    # image processing extensions
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd \
+    && pecl install gmagick-2.0.5RC1 \
+    && docker-php-ext-enable gmagick \
     # Install/Enable common extensions
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
