@@ -5,6 +5,7 @@ MAINTAINER Alexander Marinov <alexander.marinov@web-lab.ltd>
 ENV PROJECT_ROOT=/var/www/html/
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 ENV XDEBUG_REMOTE_HOST "host.docker.internal"
+ENV APP_ENV "docker"
 
 # ====================================================================
 # Install system dependencies
