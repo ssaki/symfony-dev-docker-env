@@ -6,6 +6,7 @@ ENV PROJECT_ROOT=/var/www/html/
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 ENV XDEBUG_REMOTE_HOST "host.docker.internal"
 ENV APP_ENV "docker"
+ENV APP_DEBUG "true"
 
 # ====================================================================
 # Install system dependencies
@@ -78,6 +79,7 @@ xdebug.mode=debug \n\
 xdebug.start_with_request=yes \n\
 xdebug.client_host=${XDEBUG_REMOTE_HOST} \n\
 xdebug.client_port=9003 \n\
+xdebug.log_level=0 \n\
 ' > /usr/local/etc/php/conf.d/90-xdebug-custom.ini
 
 EXPOSE 80
