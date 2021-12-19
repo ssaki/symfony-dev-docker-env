@@ -1,4 +1,4 @@
-FROM php:8.0-apache-buster
+FROM php:8.1-apache-buster
 
 MAINTAINER Alexander Marinov <alexander.marinov@web-lab.ltd>
 
