@@ -42,6 +42,9 @@ RUN docker-php-source extract \
     && docker-php-ext-install -j$(nproc) bcmath \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
     && docker-php-ext-install -j$(nproc) zip \
+    # Install/Enable Redis PHP extension
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     # Clean up
     && docker-php-source delete \
     && pecl clear-cache \
