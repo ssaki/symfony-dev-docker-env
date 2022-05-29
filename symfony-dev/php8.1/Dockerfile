@@ -18,10 +18,11 @@ RUN apt-get update -q -y \
             unzip \
             git \
             # deps of ext-zip
-            zlib1g-dev \
-            libzip-dev \
+            zlib1g-dev libzip-dev \
             # deps for imagic
             libgraphicsmagick1-dev libpng-dev libjpeg-dev \
+            # deps for AMQP
+            librabbitmq-dev libssh-dev \
             # and few helper tools for CLI
             vim wget iputils-ping \
     # Clean up
@@ -40,11 +41,15 @@ RUN docker-php-source extract \
     && docker-php-ext-install gd \
     # Install/Enable common extensions
     && docker-php-ext-install -j$(nproc) bcmath \
+    && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) pdo_mysql \
     && docker-php-ext-install -j$(nproc) zip \
     # Install/Enable Redis PHP extension
     && pecl install redis \
     && docker-php-ext-enable redis \
+    # Install/Enable AMQP
+    && pecl install amqp \
+    && docker-php-ext-enable amqp \
     # Clean up
     && docker-php-source delete \
     && pecl clear-cache \
@@ -61,7 +66,7 @@ RUN a2enmod rewrite
 
 RUN echo '\
 <VirtualHost *:80> \n\
-	#ServerName www.example.com \n\
+	#ServerNam  e www.example.com \n\
 	ServerAdmin webmaster@localhost \n\
 	DocumentRoot ${APACHE_DOCUMENT_ROOT} \n\
 	ErrorLog ${APACHE_LOG_DIR}/error.log \n\
