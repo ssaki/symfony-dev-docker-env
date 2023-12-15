@@ -1,6 +1,6 @@
-FROM php:8.3-apache-buster
+FROM php:8.3-apache
 
-MAINTAINER Alexander Marinov <alexander.marinov@web-lab.ltd>
+MAINTAINER Alexander Marinov <alex.g.marinov@gmail.com>
 
 ENV PROJECT_ROOT=/var/www/html/
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
