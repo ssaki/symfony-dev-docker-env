@@ -1,0 +1,86 @@
+name: Check Upstream Image Updates
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Weekly on Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore cached digests
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .upstream-digests
+          key: upstream-digests-will-never-match
+          restore-keys: upstream-digests-
+
+      - name: Check upstream image digests
+        id: check
+        run: |
+          mkdir -p .upstream-digests
+          REBUILD=false
+
+          get_digest() {
+            local image=$1
+            local tag=$2
+            local token
+            token=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/${image}:pull" | jq -r '.token')
+            curl -sI \
+              -H "Authorization: Bearer ${token}" \
+              -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json" \
+              "https://registry-1.docker.io/v2/library/${image}/manifests/${tag}" | \
+              grep -i 'docker-content-digest' | awk '{print $2}' | tr -d '\r\n'
+          }
+
+          for dockerfile in symfony-dev/php8.3/Dockerfile symfony-dev/php8.5/Dockerfile; do
+            FROM_REF=$(grep '^FROM' "$dockerfile" | head -1 | awk '{print $2}')
+            IMAGE=$(echo "$FROM_REF" | cut -d: -f1)
+            TAG=$(echo "$FROM_REF" | cut -d: -f2)
+            CACHE_KEY=$(echo "$dockerfile" | tr '/' '-')
+
+            echo "Checking $IMAGE:$TAG (from $dockerfile)..."
+            CURRENT=$(get_digest "$IMAGE" "$TAG")
+            echo "  Current digest: $CURRENT"
+
+            if [ -f ".upstream-digests/$CACHE_KEY" ]; then
+              CACHED=$(cat ".upstream-digests/$CACHE_KEY")
+              echo "  Cached digest:  $CACHED"
+              if [ "$CURRENT" != "$CACHED" ]; then
+                echo "  -> CHANGED"
+                REBUILD=true
+              else
+                echo "  -> unchanged"
+              fi
+            else
+              echo "  -> NEW (no cached digest)"
+              REBUILD=true
+            fi
+
+            echo "$CURRENT" > ".upstream-digests/$CACHE_KEY"
+          done
+
+          echo "rebuild=$REBUILD" >> "$GITHUB_OUTPUT"
+
+      - name: Save digest cache
+        uses: actions/cache/save@v4
+        with:
+          path: .upstream-digests
+          key: upstream-digests-${{ github.run_id }}
+
+      - name: Trigger rebuild
+        if: steps.check.outputs.rebuild == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Upstream image changed, triggering rebuild..."
+          gh workflow run docker-publish.yml --ref master
