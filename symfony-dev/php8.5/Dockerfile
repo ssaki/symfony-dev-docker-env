@@ -1,6 +1,6 @@
-FROM php:8.3-apache
+FROM php:8.5-apache
 
-MAINTAINER Alexander Marinov <alex.g.marinov@gmail.com>
+LABEL org.opencontainers.image.authors="alex.g.marinov@gmail.com"
 
 ENV PROJECT_ROOT="/var/www/symfony"
 ENV SYMFONY_PUBLIC_DIR="public"
